@@ -22,15 +22,15 @@ jobs:
     - name: Log in to registry
       uses: docker/login-action@v2
       with:
-        registry: https://index.docker.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_207d58bce8da478a95249ac31a065832 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_42d4096a470b45dcaf46ca60a94b0994 }}
+        registry: https://index.docker.io/v1/
+        username: ${{ secrets.AzureAppService_ContainerUsername_22c83ed859bf4f788cc37a88a0aed1e0 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_3d574a542aed4e9da47689f8c3ac741b }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_207d58bce8da478a95249ac31a065832 }}/tasty-routes:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_22c83ed859bf4f788cc37a88a0aed1e0 }}/obeed1/tasty-routes:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'tasty-routes'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_455035e25c0c4586851420cb23687614 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_207d58bce8da478a95249ac31a065832 }}/tasty-routes:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_cf9f931d50434b2ea61fdfaddca897ab }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_22c83ed859bf4f788cc37a88a0aed1e0 }}/obeed1/tasty-routes:${{ github.sha }}'
