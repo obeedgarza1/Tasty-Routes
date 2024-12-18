@@ -1,39 +1,30 @@
-name: Build and Deploy Docker Container to Azure Web App
+name: Build and Deploy Docker Image to Docker Hub
 
 on:
   push:
     branches:
-      - main  # Trigger deployment on push to the main branch
-  workflow_dispatch:  # Allows manual trigger
+      - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    # Set up Docker Buildx (needed for advanced Docker builds)
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    # Log in to Docker Hub
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        registry: index.docker.io  # Use Docker Hub registry
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}  # GitHub secret for Docker Hub username
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}  # GitHub secret for Docker Hub password
+        registry: index.docker.io
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}  # Your Docker Hub username
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}  # Your Docker Hub access token
 
-    # Build and push Docker image to Docker Hub
-# Build and push Docker image
-    - name: Build and push Docker image
+    - name: Build and Push Docker image
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/obeed1/tasty-routes:${{ github.sha }}  # Commit SHA as the tag
+        tags: index.docker.io/obeed1/tasty-routes:${{ github.sha }}  # Tag the image with the commit SHA
         file: ./Dockerfile  # Path to your Dockerfile
 
     # Log in to Azure using Service Principal (authentication for Azure deployment)
