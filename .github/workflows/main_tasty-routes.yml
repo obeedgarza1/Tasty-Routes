@@ -19,20 +19,21 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    # Log in to Docker Hub (or Azure Container Registry)
+    # Log in to Docker Hub
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        registry: index.docker.io  # Change to ACR if using Azure Container Registry
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}  # Add Docker username secret in GitHub
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}  # Add Docker password secret in GitHub
+        registry: index.docker.io  # Use Docker Hub registry
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}  # GitHub secret for Docker Hub username
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}  # GitHub secret for Docker Hub password
 
-    # Build and push the Docker image to Docker Hub (or ACR)
+    # Build and push Docker image to Docker Hub
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/tasty-routes:${{ github.sha }}  # Docker Hub repository and tag
+        tags: index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/tasty-routes:${{ github.sha }}  # Use commit SHA as the tag
+        file: ./Dockerfile  # Path to your Dockerfile
 
     # Log in to Azure using Service Principal (authentication for Azure deployment)
     - name: Log in to Azure
@@ -47,9 +48,9 @@ jobs:
         app-name: 'tasty-routes'  # Azure Web App name
         slot-name: 'production'   # Slot name (optional, e.g., 'staging' or 'production')
         publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}  # GitHub secret for Azure Web App publish profile
-        images: 'index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/tasty-routes:${{ github.sha }}'  # Docker image tag
+        images: 'index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/tasty-routes:${{ github.sha }}'  # Docker image tag from Docker Hub
 
-    # Optional: Set app settings (e.g., environment variables) for the Web App
+    # Set environment variables for Azure Web App (Optional, if needed in the Web App)
     - name: Set environment variables for Azure Web App
       run: |
         az webapp config appsettings set --name tasty-routes --resource-group tastyapp --settings \
