@@ -28,11 +28,12 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}  # GitHub secret for Docker Hub password
 
     # Build and push Docker image to Docker Hub
+# Build and push Docker image
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/tasty-routes:${{ github.sha }}  # Use commit SHA as the tag
+        tags: index.docker.io/obeed1/tasty-routes:${{ github.sha }}  # Commit SHA as the tag
         file: ./Dockerfile  # Path to your Dockerfile
 
     # Log in to Azure using Service Principal (authentication for Azure deployment)
