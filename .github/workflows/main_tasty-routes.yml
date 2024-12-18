@@ -1,63 +1,58 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy container app to Azure Web App - tasty-routes
+name: Build and Deploy Docker Container to Azure Web App
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main  # Trigger deployment on push to the main branch
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  build:
-    runs-on: 'ubuntu-latest'
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
+    # Set up Docker Buildx (needed for advanced Docker builds)
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
+    # Log in to Docker Hub (or Azure Container Registry)
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        registry: https://index.docker.io/v1/
-        username: ${{ secrets.DOCKER_HUB_USERNAME }} # Your Docker Hub username
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }} # Your Docker Hub password or access token
+        registry: index.docker.io  # Change to ACR if using Azure Container Registry
+        username: ${{ secrets.DOCKER_USERNAME }}  # Add Docker username secret in GitHub
+        password: ${{ secrets.DOCKER_PASSWORD }}  # Add Docker password secret in GitHub
 
-    - name: Build and push container image to Docker Hub
+    # Build and push the Docker image to Docker Hub (or ACR)
+    - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: obeed1/tasty-routes:${{ github.sha }}
-        file: ./Dockerfile
+        tags: index.docker.io/${{ secrets.DOCKER_USERNAME }}/tasty-routes:${{ github.sha }}  # Docker Hub repository and tag
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
+    # Log in to Azure using Service Principal (authentication for Azure deployment)
     - name: Log in to Azure
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}  # Login using the service principal credentials stored as GitHub secret
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  # GitHub secret for Azure service principal credentials
 
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
+    # Deploy Docker container to Azure Web App for Containers
+    - name: Deploy Docker container to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'tasty-routes'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-        images: 'obeed1/tasty-routes:${{ github.sha }}'
+        app-name: 'tasty-routes'  # Azure Web App name
+        slot-name: 'production'   # Slot name (optional, e.g., 'staging' or 'production')
+        publish-profile: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE }}  # GitHub secret for Azure Web App publish profile
+        images: 'index.docker.io/${{ secrets.DOCKER_USERNAME }}/tasty-routes:${{ github.sha }}'  # Docker image tag
 
-    - name: Set secrets in Azure App (Optional, if needed in the Web App)
+    # Optional: Set app settings (e.g., environment variables) for the Web App
+    - name: Set environment variables for Azure Web App
       run: |
         az webapp config appsettings set --name tasty-routes --resource-group tastyapp --settings \
-          AZURE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
-          AZURE_CONTAINER_NAME="${{ secrets.AZURE_CONTAINER_NAME }}" \
-          AZURE_BLOB_NAME="${{ secrets.AZURE_BLOB_NAME }}"
+        AZURE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
+        AZURE_CONTAINER_NAME="${{ secrets.AZURE_CONTAINER_NAME }}" \
+        AZURE_BLOB_NAME="${{ secrets.AZURE_BLOB_NAME }}"
