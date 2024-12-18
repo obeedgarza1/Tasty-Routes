@@ -1,5 +1,5 @@
 # Use the Python 3.9 slim bullseye base image
-FROM python:3.9-slim-bullseye
+FROM python:3.11-slim-bullseye
 
 # Set the working directory
 WORKDIR /app
