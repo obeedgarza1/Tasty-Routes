@@ -24,15 +24,15 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: index.docker.io  # Change to ACR if using Azure Container Registry
-        username: ${{ secrets.DOCKER_USERNAME }}  # Add Docker username secret in GitHub
-        password: ${{ secrets.DOCKER_PASSWORD }}  # Add Docker password secret in GitHub
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}  # Add Docker username secret in GitHub
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}  # Add Docker password secret in GitHub
 
     # Build and push the Docker image to Docker Hub (or ACR)
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.DOCKER_USERNAME }}/tasty-routes:${{ github.sha }}  # Docker Hub repository and tag
+        tags: index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/tasty-routes:${{ github.sha }}  # Docker Hub repository and tag
 
     # Log in to Azure using Service Principal (authentication for Azure deployment)
     - name: Log in to Azure
@@ -46,8 +46,8 @@ jobs:
       with:
         app-name: 'tasty-routes'  # Azure Web App name
         slot-name: 'production'   # Slot name (optional, e.g., 'staging' or 'production')
-        publish-profile: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE }}  # GitHub secret for Azure Web App publish profile
-        images: 'index.docker.io/${{ secrets.DOCKER_USERNAME }}/tasty-routes:${{ github.sha }}'  # Docker image tag
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}  # GitHub secret for Azure Web App publish profile
+        images: 'index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/tasty-routes:${{ github.sha }}'  # Docker image tag
 
     # Optional: Set app settings (e.g., environment variables) for the Web App
     - name: Set environment variables for Azure Web App
