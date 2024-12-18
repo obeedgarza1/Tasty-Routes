@@ -41,18 +41,23 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  # Login using the service principal credentials stored as GitHub secret
+
     - name: Deploy to Azure Web App
       id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'tasty-routes' # Azure Web App name
-        slot-name: 'production' # Slot name for deployment (e.g., staging/production)
-        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }} # Azure publish profile
+        app-name: 'tasty-routes'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
         images: 'obeed1/tasty-routes:${{ github.sha }}'
 
     - name: Set secrets in Azure App (Optional, if needed in the Web App)
       run: |
         az webapp config appsettings set --name tasty-routes --resource-group tastyapp --settings \
-        AZURE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
-        AZURE_CONTAINER_NAME="${{ secrets.AZURE_CONTAINER_NAME }}" \
-        AZURE_BLOB_NAME="${{ secrets.AZURE_BLOB_NAME }}"
+          AZURE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
+          AZURE_CONTAINER_NAME="${{ secrets.AZURE_CONTAINER_NAME }}" \
+          AZURE_BLOB_NAME="${{ secrets.AZURE_BLOB_NAME }}"
