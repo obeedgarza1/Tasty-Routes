@@ -29,11 +29,11 @@ if not os.path.exists(local_file_path):
 
 spark = SparkSession.builder \
     .appName('Truck_Data') \
-    .config("spark.master", "local[2]") \
-    .config("spark.driver.memory", "2g") \
-    .config("spark.executor.memory", "2g") \
-    .config("spark.executor.cores", "1") \
-    .config("spark.sql.shuffle.partitions", "4") \
+    .config("spark.master", "local[4]") \
+    .config("spark.driver.memory", "4g") \
+    .config("spark.executor.memory", "4g") \
+    .config("spark.executor.cores", "2") \
+    .config("spark.sql.shuffle.partitions", "8") \
     .getOrCreate()
 
 selected_columns = ['LATITUDE', 'LONGITUDE', 'PRICE', 'MENU_TYPE', 'ITEM_CATEGORY', 'CITY',
