@@ -14,21 +14,26 @@ import duckdb
 from azure.storage.blob import BlobServiceClient
 import os
 
-connection_string = os.getenv('AZURE_CONNECTION_STRING')
-container_name = os.getenv('AZURE_CONTAINER_NAME')
-blob_name = os.getenv('AZURE_BLOB_NAME')
-local_file_path = "truck_data.parquet"  
+local_file_path = "truck_data.parquet"
 
-blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+if not os.path.exists(local_file_path):
+    connection_string = os.getenv('AZURE_CONNECTION_STRING')
+    container_name = os.getenv('AZURE_CONTAINER_NAME')
+    blob_name = os.getenv('AZURE_BLOB_NAME')
 
-with open(local_file_path, "wb") as file:
-    file.write(blob_client.download_blob().readall())
+    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+    with open(local_file_path, "wb") as file:
+        file.write(blob_client.download_blob().readall())
 
 spark = SparkSession.builder \
-    .appName("Truck_Data") \
-    .config("spark.master", "local[*]") \
+    .appName('Truck_Data') \
+    .config("spark.master", "local[2]") \
     .config("spark.driver.memory", "2g") \
+    .config("spark.executor.memory", "2g") \
+    .config("spark.executor.cores", "1") \
+    .config("spark.sql.shuffle.partitions", "4") \
     .getOrCreate()
 
 selected_columns = ['LATITUDE', 'LONGITUDE', 'PRICE', 'MENU_TYPE', 'ITEM_CATEGORY', 'CITY',
