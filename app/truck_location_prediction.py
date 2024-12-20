@@ -29,11 +29,7 @@ if not os.path.exists(local_file_path):
 
 spark = SparkSession.builder \
     .appName('Truck_Data') \
-    .config("spark.master", "local[4]") \
-    .config("spark.driver.memory", "4g") \
-    .config("spark.executor.memory", "4g") \
-    .config("spark.executor.cores", "2") \
-    .config("spark.sql.shuffle.partitions", "8") \
+    .master("local[*]") \
     .getOrCreate()
 
 selected_columns = ['LATITUDE', 'LONGITUDE', 'PRICE', 'MENU_TYPE', 'ITEM_CATEGORY', 'CITY',
