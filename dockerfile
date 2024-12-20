@@ -26,6 +26,9 @@ RUN wget https://archive.apache.org/dist/spark/spark-3.4.0/spark-3.4.0-bin-hadoo
 ENV SPARK_HOME=/opt/spark
 ENV PATH=$SPARK_HOME/bin:$PATH
 
+ENV PYSPARK_PYTHON=python3
+ENV PYSPARK_DRIVER_PYTHON=python3
+
 # Pre-cache Matplotlib fonts
 RUN python -c "import matplotlib.pyplot as plt; plt.plot([]); plt.savefig('/tmp/temp.png')"
 
